@@ -7,8 +7,8 @@ import (
 )
 
 func Migrate(db *gorm.DB) {
-	db.AutoMigrate(&UserModel{}, &UserProfileModel{}, &SocicalAccountModel{})
-	db.Model(&UserModel{}).Related(&UserProfileModel{}, "UserID")
-	db.Model(&SocicalAccountModel{}).Related(&UserModel{})
+	//	db.AutoMigrate(&UserModel{}, &UserProfileModel{}, &SocicalAccountModel{}, &EmailAuthModel{})
+	//	db.Model(&UserModel{}).Related(&UserProfileModel{}, "UserID")
+	//	db.Model(&SocicalAccountModel{}).Related(&UserModel{})
 	fmt.Println("Auto Migration has beed processed")
 }
