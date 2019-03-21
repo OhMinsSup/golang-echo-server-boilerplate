@@ -1,10 +1,15 @@
 package models
 
-type UserModel struct {
-	id        string           `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
-	username  string           `gorm:"size:255;unique_index"`
-	email     string           `gorm:"size:255;unique_index"`
-	createdAt uint64           `gorm:"type:timestamp"`
-	updatedAt uint64           `gorm:"type:timestamp"`
-	profile   UserProfileModel `gorm:"foreignkey:UserID"`
+import (
+	"time"
+)
+
+type User struct {
+	ID        string `gorm:"primary_key;uuid"`
+	Username  string `gorm:"size:255;unique_index"`
+	Email     string `gorm:"size:255;unique_index"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
+	//	profile   UserProfile `gorm:"foreignkey:UserID"`
 }

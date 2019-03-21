@@ -1,11 +1,18 @@
 package lib
 
-import validator "gopkg.in/go-playground/validator.v9"
+import (
+	"github.com/labstack/echo"
+	validator "gopkg.in/go-playground/validator.v9"
+)
 
 type CustomValidator struct {
 	validator *validator.Validate
 }
 
-func (cv *CustomValidator) validate(i interface{}) error {
+func (cv *CustomValidator) Validate(i interface{}) error {
 	return cv.validator.Struct(i)
+}
+
+func NewValidator() echo.Validator {
+	return &CustomValidator{validator: validator.New()}
 }

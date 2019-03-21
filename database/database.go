@@ -12,11 +12,18 @@ import (
 func Initialize() (*gorm.DB, error) {
 	dbConfig := os.Getenv("DB_CONFIG")
 	db, err := gorm.Open("postgres", dbConfig)
-	db.LogMode(true) // logs SQL
+
+	// logs SQL
+	db.LogMode(true)
+	// created uuid
+	db.Callback().Create().Before("gorm:create").Register("my_plugin:before_create", models.BeforeCreateUUID)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("Connected to database")
 	models.Migrate(db)
+
+	// database close
+	defer db.Close()
 	return db, err
 }

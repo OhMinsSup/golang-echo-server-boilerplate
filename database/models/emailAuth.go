@@ -1,8 +1,13 @@
 package models
 
-type EmailAuthModel struct {
-	id     string `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
-	code   string `gorm:"size:255"`
-	email  string `gorm:"size:255"`
-	logged bool   `gorm:"default:false"`
+import "time"
+
+type EmailAuth struct {
+	ID        string `gorm:"primary_key;uuid"`
+	Code      string `gorm:"size:255"`
+	Email     string `gorm:"size:255"`
+	Logged    bool   `gorm:"default:false"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
 }

@@ -5,6 +5,8 @@ import (
 
 	"github.com/OhMinsSup/pin-server/api"
 	"github.com/OhMinsSup/pin-server/database"
+	"github.com/OhMinsSup/pin-server/lib"
+
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
@@ -20,6 +22,9 @@ func main() {
 	e := echo.New()
 	port := os.Getenv("PORT")
 	db, _ := database.Initialize()
+
+	//validate
+	e.Validator = lib.NewValidator()
 
 	// Middleware
 	e.Use(middleware.Logger())

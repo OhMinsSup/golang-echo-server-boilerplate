@@ -4,7 +4,7 @@ import (
 	"database/sql"
 )
 
-type UserProfileModel struct {
+type UserProfile struct {
 	id          string         `gorm:"type:uuid;primary_key;default:uuid_generate_v4()"`
 	displayName string         `gorm:"size:255"`
 	thumbnail   sql.NullString `gorm:"size:255"`
