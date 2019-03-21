@@ -12,11 +12,11 @@ import (
 	"github.com/labstack/echo"
 )
 
-func checkKeyword(k interface{}) string {
+func checkKeyword(k interface{}) (string, bool) {
 	if k != nil {
-		return "register"
+		return "register", true
 	} else {
-		return "login"
+		return "login", false
 	}
 }
 
@@ -40,13 +40,17 @@ func sendAuthEmail(c echo.Context) error {
 	if err := c.Bind(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Bad request Error: "+err.Error())
 	}
+
+	// validate check
 	if err := c.Validate(u); err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "Validate Error:"+err.Error())
 	}
 
+	// email exists check
 	var exists models.User
 	db.Debug().Where("email = ?", u.Email).First(&exists)
 
+	// emailAuth model created
 	emailAuth := models.EmailAuth{
 		Code:  g.Generate(),
 		Email: u.Email,
@@ -55,8 +59,9 @@ func sendAuthEmail(c echo.Context) error {
 	db.NewRecord(emailAuth)
 	db.Create(&emailAuth)
 
-	keyword := checkKeyword(exists)
+	keyword, ok := checkKeyword(exists)
 
+	// templateData init
 	templateData := struct {
 		Keyword string
 		URI     string
@@ -65,13 +70,16 @@ func sendAuthEmail(c echo.Context) error {
 		URI:     createUrl(exists, emailAuth.Code),
 	}
 
+	// Interpret and email html files
 	m := lib.NewRequest([]string{u.Email}, "veloss"+keyword, "Hello world")
 	if err := m.ParseTemplate("/statics/email.html", templateData); err == nil {
 		ok := m.SendEmail()
 		fmt.Println(ok)
 	}
 
-	return c.JSON(http.StatusOK, u)
+	return c.JSON(http.StatusOK, lib.JSON{
+		"registered": ok,
+	})
 }
 
 func locaRegister(c echo.Context) error {
