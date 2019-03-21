@@ -11,7 +11,7 @@ type Mail struct {
 	from    string   // veloss <verification@gmail.com>
 	to      []string // email
 	subject string   // veloss ${emailKeywords.text}
-	body    string   //html
+	body    string   // html
 }
 
 func NewRequest(to []string, subject, body string) *Mail {
@@ -24,11 +24,10 @@ func NewRequest(to []string, subject, body string) *Mail {
 
 func (m *Mail) SendEmail() bool {
 	auth := smtp.PlainAuth("", os.Getenv("EMAIL"), os.Getenv("PASS"), "smtp.gmail.com")
-	mime := "MIME-version: 1.0;\nContent-Type: text/plain; charset=\"UTF-8\";\n\n"
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	subject := "Subject: " + m.subject + "!\n"
 	msg := []byte(subject + mime + "\n" + m.body)
 	addr := "smtp.gmail.com:587"
-
 	if err := smtp.SendMail(addr, auth, m.from, m.to, msg); err != nil {
 		return false
 	}

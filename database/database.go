@@ -23,7 +23,5 @@ func Initialize() (*gorm.DB, error) {
 	fmt.Println("Connected to database")
 	models.Migrate(db)
 
-	// database close
-	defer db.Close()
 	return db, err
 }

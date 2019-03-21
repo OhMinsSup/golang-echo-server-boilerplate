@@ -14,17 +14,17 @@ import (
 
 func checkKeyword(k interface{}) (string, bool) {
 	if k != nil {
-		return "register", true
+		return "회원가입", false
 	} else {
-		return "login", false
+		return "로그인", true
 	}
 }
 
-func createUrl(u interface{}, code string) string {
+func createURI(u interface{}, code string) string {
 	if u != nil {
-		return "http://localhost:3000/email-register/?code=" + code
+		return "http://localhost:3000/email-register?code=" + code
 	} else {
-		return "http://localhost:3000/email-login/?code=" + code
+		return "http://localhost:3000/email-login?code=" + code
 	}
 }
 
@@ -67,12 +67,12 @@ func sendAuthEmail(c echo.Context) error {
 		URI     string
 	}{
 		Keyword: keyword,
-		URI:     createUrl(exists, emailAuth.Code),
+		URI:     createURI(exists, emailAuth.Code),
 	}
 
 	// Interpret and email html files
-	m := lib.NewRequest([]string{u.Email}, "veloss"+keyword, "Hello world")
-	if err := m.ParseTemplate("/statics/email.html", templateData); err == nil {
+	m := lib.NewRequest([]string{u.Email}, keyword, "veloss<verification@gmail.com>")
+	if err := m.ParseTemplate("statics/email.html", templateData); err == nil {
 		ok := m.SendEmail()
 		fmt.Println(ok)
 	}
