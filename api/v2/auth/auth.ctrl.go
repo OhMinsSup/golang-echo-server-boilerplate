@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/OhMinsSup/pin-server/lib"
 
@@ -30,7 +31,7 @@ func createURI(u interface{}, code string) string {
 
 func sendAuthEmail(c echo.Context) error {
 	type SendEmail struct {
-		Email string `json:"email" form:"email" query:"email" validate:"required,email"`
+		Email string `json:"email" form:"email" validate:"required,email"`
 	}
 
 	db := c.Get("db").(*gorm.DB)
@@ -48,7 +49,7 @@ func sendAuthEmail(c echo.Context) error {
 
 	// email exists check
 	var exists models.User
-	db.Debug().Where("email = ?", u.Email).First(&exists)
+	db.Where("email = ?", u.Email).First(&exists)
 
 	// emailAuth model created
 	emailAuth := models.EmailAuth{
@@ -80,6 +81,36 @@ func sendAuthEmail(c echo.Context) error {
 	return c.JSON(http.StatusOK, lib.JSON{
 		"registered": ok,
 	})
+}
+
+func code(c echo.Context) error {
+	code := c.Param("code")
+
+	db := c.Get("db").(*gorm.DB)
+
+	//check code
+	var emailAuth models.EmailAuth
+	if err := db.Where("code = ?", code).First(&emailAuth).Error; err != nil {
+		return c.JSON(http.StatusGone, lib.JSON{
+			"name": "Check_Email_Gone",
+		})
+	}
+
+	// emailAuth가 생성된지(Time형) 24시간 전인지 조사
+	target := emailAuth.CreatedAt.AddDate(0, 0, -1)
+	expireDate := time.Duration(24) * time.Hour
+	diff := (time.Since(target) >= expireDate)
+
+	// 24시간이 지나면 유효시간을 초과
+	if diff || emailAuth.Logged {
+		return c.JSON(http.StatusGone, lib.JSON{
+			"name": "EXPIRED_CODE",
+		})
+	}
+
+	// TODO 유저에 대한 유효성 검사를통한 로그인및 회원가입 로직 전환
+
+	return c.String(http.StatusOK, "Hello World")
 }
 
 func locaRegister(c echo.Context) error {

@@ -12,8 +12,6 @@ import (
 // Migrate automigrates models using ORM
 func Migrate(db *gorm.DB) {
 	db.AutoMigrate(&User{}, &EmailAuth{})
-	//	db.Model(&UserModel{}).Related(&UserProfileModel{}, "UserID")
-	//	db.Model(&SocicalAccountModel{}).Related(&UserModel{})
 	fmt.Println("Auto Migration has beed processed")
 }
 
