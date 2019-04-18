@@ -71,6 +71,7 @@ func sendAuthEmail(c echo.Context) error {
 		URI:     createURI(exists, emailAuth.Code),
 	}
 
+	// 이메일 템플릿 생성및 전송
 	// Interpret and email html files
 	m := lib.NewRequest([]string{u.Email}, keyword, "veloss<verification@gmail.com>")
 	if err := m.ParseTemplate("statics/email.html", templateData); err == nil {
@@ -78,7 +79,7 @@ func sendAuthEmail(c echo.Context) error {
 		fmt.Println(ok)
 	}
 
-	return c.JSON(http.StatusOK, lib.JSON{
+	return c.JSON(http.StatusOK, echo.Map{
 		"registered": ok,
 	})
 }
@@ -88,10 +89,10 @@ func code(c echo.Context) error {
 
 	db := c.Get("db").(*gorm.DB)
 
-	//check code
+	//  발급된 code값 유효성 체크
 	var emailAuth models.EmailAuth
 	if err := db.Where("code = ?", code).First(&emailAuth).Error; err != nil {
-		return c.JSON(http.StatusGone, lib.JSON{
+		return c.JSON(http.StatusGone, echo.Map{
 			"name": "Check_Email_Gone",
 		})
 	}
@@ -103,14 +104,39 @@ func code(c echo.Context) error {
 
 	// 24시간이 지나면 유효시간을 초과
 	if diff || emailAuth.Logged {
-		return c.JSON(http.StatusGone, lib.JSON{
+		return c.JSON(http.StatusGone, echo.Map{
 			"name": "EXPIRED_CODE",
 		})
 	}
 
-	// TODO 유저에 대한 유효성 검사를통한 로그인및 회원가입 로직 전환
+	// 유저 체크
+	var user models.User
+	if err := db.Where("email = ?", emailAuth.Email).First(&user).Error; err != nil {
+		type registerTokenJwt struct {
+			ID    string `json:id`
+			Email string `json:"email"`
+		}
 
-	return c.String(http.StatusOK, "Hello World")
+		// 토큰으로 생성할 것 생성
+		claims := &registerTokenJwt{
+			emailAuth.ID,
+			emailAuth.Email,
+		}
+
+		//  token is valid for 1hour
+		exp := time.Now().Add(time.Hour * 24)
+
+		// 토큰 생성
+		registerToken, _ := lib.GenerateToken(claims, exp, "email-register")
+
+		return c.JSON(http.StatusOK, echo.Map{
+			"email": emailAuth.Email,
+			"register_token": registerToken
+		})
+	}
+	// 로그인 로직
+
+	return c.String(http.StatusOK, "로그인 이다")
 }
 
 func locaRegister(c echo.Context) error {
