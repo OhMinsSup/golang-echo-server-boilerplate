@@ -9,9 +9,9 @@ import (
 
 func GenerateToken(data JSON, exp time.Time, subject string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user": data,
-		"exp":  exp.Unix(),
-		"subject": subject 
+		"user":    data,
+		"exp":     exp.Unix(),
+		"subject": subject,
 	})
 
 	// get jwt secret key value

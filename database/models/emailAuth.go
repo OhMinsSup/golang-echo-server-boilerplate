@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// EmailAuth 모델
 type EmailAuth struct {
 	ID        string `gorm:"primary_key;uuid"`
 	Code      string `gorm:"size:255"`
