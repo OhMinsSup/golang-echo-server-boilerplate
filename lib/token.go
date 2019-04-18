@@ -7,7 +7,8 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-func GenerateToken(data JSON, exp time.Time, subject string) (string, error) {
+// GenerateToken 토큰을 생성하는 함수
+func GenerateToken(data interface{}, exp time.Time, subject string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"user":    data,
 		"exp":     exp.Unix(),

@@ -130,8 +130,8 @@ func code(c echo.Context) error {
 		registerToken, _ := lib.GenerateToken(claims, exp, "email-register")
 
 		return c.JSON(http.StatusOK, echo.Map{
-			"email": emailAuth.Email,
-			"register_token": registerToken
+			"email":          emailAuth.Email,
+			"register_token": registerToken,
 		})
 	}
 	// 로그인 로직
