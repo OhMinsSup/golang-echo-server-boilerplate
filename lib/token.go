@@ -1,23 +1,59 @@
 package lib
 
 import (
+	"errors"
+	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+var jwtKey []byte
+
+func init() {
+	pwd, _ := os.Getwd()
+	keyPath := pwd + "/jwtsecret.key"
+
+	key, readErr := ioutil.ReadFile(keyPath)
+	if readErr != nil {
+		panic("failed to load secret key file")
+	}
+	jwtKey = key
+}
+
 // GenerateToken 토큰을 생성하는 함수
-func GenerateToken(data interface{}, exp time.Time, subject string) (string, error) {
+func GenerateToken(data JSON) (string, error) {
+	date := time.Now().Add(time.Hour * 24 * 7)
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user":    data,
-		"exp":     exp.Unix(),
-		"subject": subject,
+		"data": data,
+		"exp":  date.Unix(),
 	})
 
-	// get jwt secret key value
-	jwtsecret := os.Getenv("JWT")
-	result, err := token.SignedString(jwtsecret)
+	tokenString, err := token.SignedString(jwtKey)
 
-	return result, err
+	return tokenString, err
+}
+
+// DecodeToken 토큰으로 생성된 데이터를 해석해서 반환하는 함수
+func DecodeToken(deocedToken string) (JSON, error) {
+	result, err := jwt.Parse(deocedToken, func(token *jwt.Token) (interface{}, error) {
+		// Don't forget to validate the alg is what you expect:
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+		}
+		return jwtKey, nil
+	})
+
+	if err != nil {
+		return JSON{}, err
+	}
+
+	if !result.Valid {
+		return JSON{}, errors.New("invalid token")
+	}
+
+	return result.Claims.(jwt.MapClaims), nil
 }

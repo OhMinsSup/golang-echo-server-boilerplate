@@ -37,7 +37,6 @@ func main() {
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
-
 	api.ApplyRoutes(e)
 
 	e.Logger.Fatal(e.Start(":" + port))
