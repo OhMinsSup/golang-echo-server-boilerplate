@@ -27,7 +27,6 @@ func main() {
 	e.Validator = lib.NewValidator()
 
 	// Middleware
-	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
 	e.Use(database.Inject(db))
 

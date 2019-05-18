@@ -12,16 +12,16 @@ import (
 
 // RequestLocalRegister localRegister 요청 Body 데이터값
 type RequestLocalRegister struct {
-	Username    string `json:"username" validate:"required,max=16,min=1"`
-	DisplayName string `json:"display_name" validate:"required,max=45,min=1"`
-	Email       string `json:"email" validate:"required,email"`
-	Password    string `json:"password" validate:"required, min=6"`
+	Username    string `json:"username" form:"username" validate:"required,max=16,min=1"`
+	DisplayName string `json:"display_name" form:"display_name" validate:"required,max=45,min=1"`
+	Email       string `json:"email" form:"email" validate:"required,email"`
+	Password    string `json:"password" form:"password" validate:"required,min=6"`
 }
 
 // RequestLocalLogin localLogin 요청 Body 데이터값
 type RequestLocalLogin struct {
 	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required, min=6"`
+	Password string `json:"password" validate:"required,min=6"`
 }
 
 func locaRegister(c echo.Context) error {
@@ -112,5 +112,23 @@ func login(c echo.Context) error {
 	return c.JSON(http.StatusOK, echo.Map{
 		"user":  serialized,
 		"token": token,
+	})
+}
+
+func check(c echo.Context) error {
+	return c.JSON(http.StatusOK, echo.Map{
+		"ok": true,
+	})
+}
+
+func logout(c echo.Context) error {
+	cookie := new(http.Cookie)
+	cookie.Name = "access_token"
+	cookie.Value = ""
+
+	c.SetCookie(cookie)
+
+	return c.JSON(http.StatusOK, echo.Map{
+		"ok": true,
 	})
 }
